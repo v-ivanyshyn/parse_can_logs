@@ -27,18 +27,18 @@ with open(csvFilaPath, 'r') as file:
         if not id in frames:
             frames[id] = FrameStream()
         frame = frames[id]
-        frame.timeStream.append(time)
         if len(frame.bytesStream) == 0:
             frame.bytesStream = [[x] for x in bytes]
         else:
-            assert len(bytes) == len(frame.bytesStream)
+            if len(bytes) != len(frame.bytesStream):
+                continue # frame damaged
             for b, byte in enumerate(bytes):
                 frame.bytesStream[b].append(byte)
+        frame.timeStream.append(time)
         assert len(frame.timeStream) == len(frame.bytesStream[0])
 
 print 'CSV parsed'
 
-# smooth single frame spikes (it happens that time to time we get broken data in CAN frames):
 errorsCount = 0
 for (_, frame) in frames.items():
     for byteStream in frame.bytesStream:
@@ -83,8 +83,8 @@ y = map(lambda b: b, frames['0x280'].bytesStream[0])
 collection = plt_collections.BrokenBarHCollection.span_where(x, ymin=0, ymax=20, where=[dy <= 1 for dy in y], facecolor='green', alpha=0.25)
 axs[0].add_collection(collection)
 
-# dispaly speed and steering angle:
-axs[1].set_title('0x1A0, 0xC2, 0x540 parsed')
+# dispaly speed steering angle and L/R forces:
+axs[1].set_title('0x1A0, 0xC2, 0x540, 0x5C0 parsed')
 x = map(lambda time: time * 0.001, frames['0x1A0'].timeStream)
 y = map(lambda (b1, b2): (b1*256 + b2) * 0.005, zip(frames['0x1A0'].bytesStream[3], frames['0x1A0'].bytesStream[2]))
 axs[1].plot(x, y, label='Speed')
@@ -99,6 +99,10 @@ axs[1].fill_between(x, 0, y, label='Steering', facecolor='green', alpha=0.25)
 x = map(lambda time: time * 0.001, frames['0x540'].timeStream)
 y = map(lambda b: b, frames['0x540'].bytesStream[7])
 axs[1].plot(x, y, label='Gear')
+x = map(lambda time: time * 0.001, frames['0x5C0'].timeStream)
+y = map(lambda b: b, frames['0x5C0'].bytesStream[2])
+axs[1].plot(x, y, label='L. force')
+axs[1].fill_between(x, [128 for a in y], y, label='L. force', facecolor='blue', alpha=0.25)
 
 # display raw values of 8 bytes of specified CAN ID, skip constant and noise bytes:
 bytesCount = len(frames[frameId].bytesStream)
