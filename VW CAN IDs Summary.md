@@ -19,7 +19,7 @@ ID | Decoded bytes data | Assumptions/observations
 0x1AC | | `b0` inverse of `b1` - brake pressure?, `b4` - noisy, correlates d(speed)
 0x280 | `b0` - clutch (`bit3`) and acceleration (`bit0`) pedals, `b1`=`b4`=`b7` - torque or engine load, `b3<<8+b2` - RPM, `b5` - acceleration pedal | `b6` - some smooth graph
 0x288 | `b1` - coolant temp. (X*0.75-48) | `b2` - low correlation to braking, `b6` - power? (correlates torque+rpm)
-0x320 | `b4<<8+b3` - speed, `b6<<8+b5` - speed adjusted (+5%) | `b0` - bit change when engine on, `b1` - bit change when start/stop driving, `b2` - fuel level?
+0x320 | `b2` - fuel level, `b4<<8+b3` - speed, `b6<<8+b5` - speed adjusted (+5%) | `b0` - bit change when engine on, `b1` - bit change when start/stop driving
 0x390 | `b3` - reverse gear light (`bit4`), `b4` - left/right turn signals (`bit2`/`bit3`), `b6` - low/high beam light (`bit0`/`bit1`), hazard lights (`bit7`), `b7` - brake signal (`bit3`) |
 0x3A0 | | `b6` - some ticks, correlates speed
 0x3D0 | | `b0` - noisy when steering, wheel amplifier?
@@ -29,6 +29,7 @@ ID | Decoded bytes data | Assumptions/observations
 0x4A0 | `b1<<8+b0` - ABS speed, each pair of bytes for each wheel |
 0x4A8 | | `b2` - brake pressure?
 0x497 | `b1`, `b7` - parktronic |
+0x520 | `b7<<8<<8 + b6<<8 + b5` - mileage (odometer) |
 0x540 | `b7` - selected/recommended gear (calculated from speed/rpm ratio) |
 0x588 | `b4` - turbine boost | `b1` - correlates torque/speed?
 0x5A0 | | `b0` - radial force (128 - baseline, noisy), `b2<<8+b1` - correlates speed, `b6<<8+b5` - some other smooth graph
