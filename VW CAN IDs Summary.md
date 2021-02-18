@@ -22,8 +22,9 @@
   * `b3<<8+b2` - speed
   * (?) `b7` - noise
 + **0x1AC**
-  * (?) `b0` inverse of `b1` - brake pressure?
+  * (?) `b1` - saw on 0/128 levels, brake pressure?
   * (?) `b4` - noisy, correlates d(speed)
+  * (?) `b5` - braking with engine, only on cruise (`bit7`)?
 + **0x280**
   * `b0` - clutch (`bit3`) and acceleration (`bit0`) pedals
   * `b1`=`b4`=`b7` - torque or engine load
@@ -31,8 +32,9 @@
   * `b5` - acceleration pedal or cruise
   * (?)`b6` - some smooth graph
 + **0x284**
-  * (?) `b1` - saw on different levels, levels corelate braking
-  * (?) `b3<<8+b2` - smooth graph corelates braking
+  * (?) `b1` - saw on different levels, levels depend on ACC braking
+  * `b2` - smooth graph, correlates ACC braking ACC
+  * `b4<<8+b3` - ACC braking
 + **0x288**
   * `b1` - coolant temp. (X*0.75-48)
   * `b2` - ACC working (`bit6`)
@@ -72,7 +74,7 @@
 + **0x4A0**
   * `b1<<8+b0` - ABS speed, each pair of bytes for each wheel
 + **0x4A8**
-  * (?) `b2` - brake pressure?
+  * `b3<<8+b2` - brake pressure excluding ACC. `b3=128` if no braking, otherwise `0...1`
 + **0x497**
   * `b1`, `b7` - parktronic
 + **0x520**
