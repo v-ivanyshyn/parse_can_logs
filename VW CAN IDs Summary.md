@@ -18,7 +18,7 @@
 + **0xD0**
   * (?) `b2` - steering wheel amplifier
 + **0x1A0**
-  * `b1` - brake (`bit3`)
+  * `b1` - brake pedal (`bit3`)
   * `b3<<8+b2` - speed
   * (?) `b7` - noise
 + **0x1AC**
@@ -28,7 +28,7 @@
   * `b0` - clutch (`bit3`) and acceleration (`bit0`) pedals
   * `b1`=`b4`=`b7` - torque or engine load
   * `b3<<8+b2` - RPM
-  * `b5` - acceleration pedal
+  * `b5` - acceleration pedal or cruise
   * (?)`b6` - some smooth graph
 + **0x284**
   * (?) `b1` - saw on different levels, levels corelate braking
@@ -92,6 +92,7 @@
   * (?) `b0`, `b1` - parking brake?
   * `b2` - long. force (128 - baseline)
   * `b5` - clutch (`bit5`)
+  * `b7` - saw, level means acceleration/braking (binary)
 + **0x5E0**
   * `b4`, `b6` - climate on/off
 
