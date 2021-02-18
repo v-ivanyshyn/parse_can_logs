@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import matplotlib.collections as plt_collections
+from matplotlib.widgets import Button
 import csv
 
 csvFilaPath = 'log.csv'
-frameId = '0x540'  # CAN ID to analyze
 
 
 class FrameStream:
@@ -18,12 +18,20 @@ frames = dict()
 with open(csvFilaPath, 'r') as file:
     rows = csv.reader(file, delimiter=',')
     for row in rows:
-        if len(row) < 3:
-            print 'incorrect row:', row
+        if len(row) < 3 or not row[0].startswith('0x'):
+            print 'skip row:', row
             continue
         id = row[0]
-        time = int(row[1])
-        bytes = map(lambda x: int(x), row[2:])
+        try:
+            time = int(row[1])
+        except ValueError:
+            print 'incorrect row time:', row
+            continue
+        try:
+            bytes = map(lambda x: int(x), row[2:])
+        except ValueError:
+            print 'incorrect row numbers:', row
+            continue
         if not id in frames:
             frames[id] = FrameStream()
         frame = frames[id]
@@ -67,6 +75,9 @@ for key, frame in frames.iteritems():
 
 # make 4 subplots with shared X axis:
 fig, axs = plt.subplots(4, 1, sharex='all')
+plt.xlim(frames.values()[0].timeStream[0] * 0.001, frames.values()[0].timeStream[-1] * 0.001)
+# fig.tight_layout() - brakes buttons
+plt.subplots_adjust(left=0.05, right=0.99, top=0.9, bottom=0.1)
 
 # display graphs of parsed and calculated RPM, Torque, etc. :
 axs[0].set_title('0x280 parsed')
@@ -104,40 +115,73 @@ y = map(lambda b: b, frames['0x5C0'].bytesStream[2])
 axs[1].plot(x, y, label='L. force')
 axs[1].fill_between(x, [128 for a in y], y, label='L. force', facecolor='blue', alpha=0.25)
 
-# display raw values of 8 bytes of specified CAN ID, skip constant and noise bytes:
-bytesCount = len(frames[frameId].bytesStream)
-axs[2].set_title(frameId + ': ' + str(bytesCount) + ' bytes')
-x = map(lambda time: time * 0.001, frames[frameId].timeStream)
-for i in range(0, bytesCount):
-    y = frames[frameId].bytesStream[i]
-    dy = map(lambda (v1, v2): v2-v1, zip(y, y[1:]))
-    avr = sum(map(lambda x: abs(x), dy))
-    if avr == 0:
-        print frameId, 'skip constant byte', i
-        continue  # skip constant byte
-    avr /= len(dy)
-    if avr > 5:
-        print frameId, 'skip noise byte', i
-        continue  # skip noise
-    axs[2].plot(x, y, label='Byte ' + str(i))
 
-axs[3].set_title(frameId + ' constant values intervals')
-axs[3].yaxis.set_visible(False)
-frame = frames[frameId]
-for b, byteTimestamps in enumerate(frame.constTimestamps):
-    if len(byteTimestamps) == 0:
-        continue
-    axs[3].text(1, b + 0.5, 'b' + str(b), va='center', color='black', fontsize='x-small')
-    prevTimeStart = frame.timeStream[byteTimestamps[0][0]] * 0.001
-    for i, timestamp in enumerate(byteTimestamps):
-        timeStart = frame.timeStream[timestamp[0]] * 0.001
-        timeEnd = frame.timeStream[timestamp[1]] * 0.001
-        axs[3].barh(y=b, bottom=b+1, width=timeEnd - timeStart, left=prevTimeStart, color=('yellow' if i % 2 == 0 else 'lime'))
-        prevTimeStart = timeEnd
-        byteValue = frame.bytesStream[b][timestamp[0]]
-        axs[3].text((timeStart + timeEnd) / 2, b + 0.5, str(byteValue), ha='center', va='center', color='black', fontsize='x-small')
+def displayCustomFrame(frameId):
+    # display raw values of 8 bytes of specified CAN ID, skip constant and noise bytes:
+    bytesCount = len(frames[frameId].bytesStream)
+    axs[2].set_title(frameId + ': ' + str(bytesCount) + ' bytes')
+    x = map(lambda time: time * 0.001, frames[frameId].timeStream)
+    for i in range(0, bytesCount):
+        y = frames[frameId].bytesStream[i]
+        dy = map(lambda (v1, v2): v2-v1, zip(y, y[1:]))
+        avr = sum(map(lambda x: abs(x), dy))
+        if avr == 0:
+            print frameId, 'skip constant byte', i
+            continue  # skip constant byte
+        avr /= len(dy)
+        if avr > 5:
+            print frameId, 'skip noise byte', i
+            continue  # skip noise
+        axs[2].plot(x, y, label='Byte ' + str(i))
+    axs[2].legend(fontsize='x-small')
+
+    axs[3].set_title(frameId + ' constant values intervals')
+    axs[3].yaxis.set_visible(False)
+    frame = frames[frameId]
+    for b, byteTimestamps in enumerate(frame.constTimestamps):
+        if len(byteTimestamps) == 0:
+            continue
+        axs[3].text(1, b + 0.5, 'b' + str(b), va='center', color='black', fontsize='x-small')
+        prevTimeStart = frame.timeStream[byteTimestamps[0][0]] * 0.001
+        for i, timestamp in enumerate(byteTimestamps):
+            timeStart = frame.timeStream[timestamp[0]] * 0.001
+            timeEnd = frame.timeStream[timestamp[1]] * 0.001
+            axs[3].barh(y=b, bottom=b+1, width=timeEnd - timeStart, left=prevTimeStart, color=('yellow' if i % 2 == 0 else 'lime'))
+            prevTimeStart = timeEnd
+            byteValue = frame.bytesStream[b][timestamp[0]]
+            axs[3].text((timeStart + timeEnd) / 2, b + 0.5, str(byteValue), ha='center', va='center', color='black', fontsize='x-small')
+    axs[3].legend(fontsize='x-small')
 
 axs[0].legend(fontsize='x-small')
 axs[1].legend(fontsize='x-small')
-axs[2].legend(fontsize='x-small')
+
+frameIdIndex= 0
+frameId = frames.keys()[frameIdIndex]
+def nextClick(event):
+    global frameId
+    global frameIdIndex
+    axs[2].clear()
+    axs[3].clear()
+    frameIdIndex = (frameIdIndex + 1) % len(frames)
+    frameId = frames.keys()[frameIdIndex]
+    displayCustomFrame(frameId)
+    plt.draw()
+def prevClick(event):
+    global frameId
+    global frameIdIndex
+    axs[2].clear()
+    axs[3].clear()
+    frameIdIndex = (frameIdIndex - 1) % len(frames)
+    frameId = frames.keys()[frameIdIndex]
+    displayCustomFrame(frameId)
+    plt.draw()
+axprev = plt.axes([0.88, 0.01, 0.05, 0.05])
+bprev = Button(axprev, '<')
+bprev.on_clicked(prevClick)
+axnext = plt.axes([0.94, 0.01, 0.05, 0.05])
+bnext = Button(axnext, '>')
+bnext.on_clicked(nextClick)
+
+fig.suptitle(csvFilaPath)
+displayCustomFrame(frameId)
 plt.show()
