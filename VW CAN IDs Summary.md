@@ -1,4 +1,4 @@
-# Volkswagen drivetrain CAN bus IDs
+# Volkswagen drivetrain CAN bus IDs (PQ platform)
 ---
 ## Shortkeys:
 
