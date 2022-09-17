@@ -19,6 +19,7 @@
 	* `(b4<<8+b5)/100`: Speed
 	* `b6`: 1 for rear gear
 + **0x167:**
+	* `b0`: 0 if engine off, 32 on engine start, 114 if engine running
 	* *`b1<<8+b2`: looks like torque demand (use this formula for reasonable values: `((b1-127)<<8 + b2 - 128) / 5`)*
 	* *`b5<<8+b6`: looks like torque torque/load (use this formula for reasonable values: `((b5-25)<<8 + b6 - 128) / 5`)*
 + **0x171:**
@@ -38,8 +39,8 @@
 	* `((b0&3)<<8+b1) / 10`: accelerator pedal (0-100)
 	* *`(b3<<8+b4) * 2`: matches RPM, but with smoother up/down edges sometimes*
 + **0x20A:**
-	* `b0`: drive modes (0 - engine off, 1 - normal, 17 - sport/track, 33 - snow)
-	* *`b1`: current gear (P/N - 132, R - 244, D/S - 140, `bit3` - engine on, `bit7` - drops on gears change, is it clutch?*
+	* `b0`: drive modes (1 - normal, 17 - sport/track, 33 - snow)
+	* *`b1`: represents current gear, `bit7` - drops sometimes when gears change, `bit2` drops sometimes*
 + **0x213:**
 	* *`b5<<8+b6`: looks like G force (`b5` is 2 for forward force, 1 for backward)*
 + **0x226:**
@@ -52,6 +53,10 @@
 	* *`b5<<8+b6`: slowly decreases during run. Gas in tank?*
 + **0x331:**
 	* *`b2<<8+b3`: slowly grows during run*
++ **0x38D:**
+	* *`b4`: spike on engine start. Alternator?*
++ **0x3AA:**
+	* *`b1`: 32->33->32 on engine start*
 + **0x3D0:**
 	* *`b2<<8+b3`: slowly grows during engine off, idle stay and run*
 + **0x415:**
