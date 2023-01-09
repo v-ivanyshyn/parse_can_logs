@@ -1,4 +1,4 @@
-# Volkswagen drivetrain CAN bus IDs (PQ platform)
+# Volkswagen drivetrain CAN bus IDs (PQ46)
 ---
 ## Shortkeys:
 
@@ -22,7 +22,7 @@
   * `b3<<8+b2` - speed
   * (?) `b7` - noise
 + **0x1AC**
-  * (?) `b1` - saw on 0/128 levels, brake pressure?
+  * (?) `b1` - saw on 0/128 levels, ACC braking
   * (?) `b4` - noisy, correlates d(speed)
   * (?) `b5` - braking with engine, only on cruise (`bit7`)?
 + **0x280**
@@ -45,7 +45,10 @@
   * `b2` - fuel level
   * `b4<<8+b3` - speed
   * `b6<<8+b5` - speed adjusted (+5%)
++ **0x368**
+  * `b4<<8+b3` - ACC request acceleration
 + **0x380**
+  * `b1` - intake air temp. (X*0.75-48)
   * `b2` - acceleration pedal (excluding cruise control)
 + **0x38A**
   * `b1` - ACC buttons (128 - off, `bit0` - on/off, `bit2` - spd down, `bit3` - spd up)
@@ -64,6 +67,7 @@
 + **0x3D0**
   * (?) `b0` - noisy when steering, wheel amplifier?
 + **0x480**
+  * `b0` - strange counter, if it has ticks with `b0 & 0b100001 == 0b100001` then DPF regeneration is active
   * (?) `b3` - slowly grows up when engine on, grow correlates speed, fuel concumption?
   * `b5` - clutch fully disengaged (`bit7`)
 + **0x488**
@@ -82,8 +86,8 @@
 + **0x540**
   * `b7` - selected/recommended gear (calculated from speed/rpm ratio)
 + **0x588**
-  * (?) `b1` - correlates torque/speed?
   * `b4` - turbine boost
+  * `b7` - oil temp. (X-60)
 + **0x598**
   * `b0` - DCC mode - last two bits for comfort (`01`), normal (`10`), sport (`11`), `bit1` always `1`, `bit3` - button pressed
 + **0x5A0**
