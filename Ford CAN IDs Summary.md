@@ -8,19 +8,19 @@
 
 ---
 
-+ **0x076 (HS1 & HS3):**
++ **0x076 (HS1 & HS3, 20ms):**
 	* `b0<<8+b1`: steering
 	* `b5<<8+b6`: speed: `(b5<<8 + b6) / 100`
-+ **0x077 (HS1 & HS3):**
++ **0x077 (HS1 & HS3, 20ms):**
 	* `b0<<8+b1`: speed
 	* `b2<<8+b3`: lateral G force
-+ **0x07D (HS1):**
++ **0x07D (HS1, 20ms):**
 	* `b0<<8+b1`: braking pressure
 + **0x082 (HS1):**
 	* `b0`: steering with some noise
 	* `b2<<8+b3`: power steering
 	* *`b4`: relates to steering, opposite to `b2<<8+b3`*
-+ **0x083 (HS1):**
++ **0x083 (HS1, 100ms):**
 	* `b0`: turn signals (16 - left, 32 - right)
 + **0x085 (HS1):**
 	* `b0<<8+b1`: steering
@@ -29,41 +29,41 @@
 	* `b2`: gearbox mode (1 - P, 14 - during engine start, 17 - R, 33 - N, 49 - D, 65 - S)
 	* `b4<<8+b5`: speed: `(b4<<8 + b5) / 100`
 	* `b6`: 1 for rear gear
-+ **0x167 (HS1 & HS3):**
++ **0x167 (HS1 & HS3, 10ms):**
 	* `b0`: 0 if engine off, 32 on engine start, 114 if engine running
 	* *`b1<<8+b2`: looks like engine load / torque (use this formula for reasonable values: `((b1-127)<<8 + b2 - 128) / 5`)*
 	* `b5<<8+b6`: MAP (manifold abs. pressure): `(b5-25)<<8 + b6 - 128) / 5`
-+ **0x171 (HS1 & HS3):**
++ **0x171 (HS1 & HS3, 30ms):**
 	* `b0`: current gear (20 - P/N, 36, 52, 68, 84, 100 - for gears), `bit1` for manual mode. *Sometimes value differs, ex: P->R: 14->10->14*
 	* `b1`: gearbox mode (0 - P, 32 - R, 64 - N, 96 - D, 128 - S)
-+ **0x178 (HS1 & HS3):**
++ **0x178 (HS1 & HS3, 100ms):**
 	* *`b2<<8+b3`: some +/- constant graph during run*
 	* *`b5`: some +/- constant graph during run*
 	* *`b6`: some +/- constant graph during run*
 	* *`b7`: some +/- constant graph during run*
-+ **0x179 (HS1 & HS3):**
++ **0x179 (HS1 & HS3, 100ms):**
 	* *`b5<<8+b6`: some growing graph
 	* *`b7`: saw-like graph during engine off, idle stay and run*
-+ **0x202 (HS1 & HS3):**
++ **0x202 (HS1 & HS3, 20ms):**
 	* `b0`: rear gear (4 - P/N/D/S, 12 - R)
 	* `b6<<8+b7`: speed: `(b6<<8 + b7) / 100`
-+ **0x204 (HS1 & HS3):**
++ **0x204 (HS1 & HS3, 10ms):**
 	* `b0<<8+b1`: accelerator pedal (0-100): `((b0&3)<<8 + b1) / 10`
 	* *`b3<<8+b4`: matches RPM, but with smoother up/down edges sometimes: `(b3<<8 + b4) * 2`*
 + **0x20A (HS3):**
 	* `b0`: drive modes (1 - normal, 17 - sport/track, 33 - snow)
 	* *`b1`: represents current gear, `bit7` - drops sometimes when gears change, `bit2` drops sometimes*
-+ **0x213 (HS1 & HS3):**
++ **0x213 (HS1 & HS3, 20ms):**
 	* *`b4`: 0 when driving, 128 if speed=0*
 	* `b5<<8+b6`: longitudinal G force: `(b1-18)8 + b2`
-+ **0x216 (HS1 & HS3):**
++ **0x216 (HS1 & HS3, 20ms):**
 	* *not understandable saw-like graphs, frequency correlates with speed*
-+ **0x217 (HS1):**
++ **0x217 (HS1, 10ms):**
 	* speed on 4 wheels per every 2 bytes (LF, RF, LR, RR): `(b0<<8 + b1) / 100`
-+ **0x230 (HS1):**
++ **0x230 (HS1, 20ms):**
 	* `b0`: current gear (224 - R, 16 - 1, 32 - 2, ..., bit0 for clutch disengaged)
 	* `b1`: gearbox mode (2 - R, 4 - N, 6 - D, 8 - S)
-+ **0x242 (HS1):**
++ **0x242 (HS1, 40ms):**
 	* *`b2<<8+b3`: correlates with headlights on/off, saw-like graph when engine idles. Current?*
 + **0x313 (HS3):**
 	* *`b5`: constantly grows, depending on speed. Odometer?*
