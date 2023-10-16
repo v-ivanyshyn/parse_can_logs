@@ -22,6 +22,9 @@
 	* *`b4`: relates to steering, opposite to `b2<<8+b3`*
 + **0x083 (HS1, 100ms):**
 	* `b0`: turn signals (16 - left, 32 - right)
++ **0x084 (HS1, 1000ms):**
+	* `b4`: time, seconds (0-60)
+	* `b5`: time, minutes
 + **0x085 (HS1):**
 	* `b0<<8+b1`: steering
 + **0x109 (HS3):**
