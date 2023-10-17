@@ -27,6 +27,9 @@
 	* `b5`: time, minutes
 + **0x085 (HS1):**
 	* `b0<<8+b1`: steering
++ **0x092 (HS1, 100ms):**
+	* *`b2<<8+b3`: noise during driving, some kind of body position sensor?*
+	* *`b4<<8+b5`: correlates with longitudinal G force (`0x213`) with more noise*
 + **0x109 (HS3):**
 	* `b0<<8+b1`: RPM: `(b0<<8 + b1) / 4`
 	* `b2`: gearbox mode (1 - P, 14 - during engine start, 17 - R, 33 - N, 49 - D, 65 - S)
@@ -34,7 +37,7 @@
 	* `b6`: 1 for rear gear
 + **0x167 (HS1 & HS3, 10ms):**
 	* `b0`: 0 if engine off, 32 on engine start, 114 if engine running
-	* *`b1<<8+b2`: looks like engine load / torque (use this formula for reasonable values: `((b1-127)<<8 + b2 - 128) / 5`)*
+	* *`b1<<8+b2`: looks like engine load / torque (use this formula for reasonable values: `((b1-128)<<8 + b2) / 4`)*
 	* `b5<<8+b6`: MAP (manifold abs. pressure): `(b5-25)<<8 + b6 - 128) / 5`
 + **0x171 (HS1 & HS3, 30ms):**
 	* `b0`: current gear (20 - P/N, 36, 52, 68, 84, 100 - for gears), `bit1` for manual mode. *Sometimes value differs, ex: P->R: 14->10->14*
@@ -47,6 +50,9 @@
 + **0x179 (HS1 & HS3, 100ms):**
 	* *`b5<<8+b6`: some growing graph
 	* *`b7`: saw-like graph during engine off, idle stay and run*
++ **0x200 (HS1, 20ms):**
+	* `b2<<8+b3`: ?
+	* *`b4<<8+b5`: throttle position?*
 + **0x202 (HS1 & HS3, 20ms):**
 	* `b0`: rear gear (4 - P/N/D/S, 12 - R)
 	* `b6<<8+b7`: speed: `(b6<<8 + b7) / 100`
@@ -58,7 +64,7 @@
 	* *`b1`: represents current gear, `bit7` - drops sometimes when gears change, `bit2` drops sometimes*
 + **0x213 (HS1 & HS3, 20ms):**
 	* *`b4`: 0 when driving, 128 if speed=0*
-	* `b5<<8+b6`: longitudinal G force: `(b1-18)8 + b2`
+	* `b5<<8+b6`: longitudinal G force: `if (b5 & 0x2) then b6 else if (b5 & 0x1) then (b6 - 256) else 0`
 + **0x216 (HS1 & HS3, 20ms):**
 	* *not understandable saw-like graphs, frequency correlates with speed*
 + **0x217 (HS1, 10ms):**
@@ -108,7 +114,7 @@
 + **0x42D (HS1 & HS3):**
 	* *`b2`: graph opposite to speed, low on idle stay, grows when engine starts, decreases on speeding, current?*
 + **0x42F (HS1 & HS3):**
-	* *`b4<<8+b5`: looks like engine load / torque, the same as `0x167 b1<<8+b2` (use this formula for reasonable values: `(b4&3)<<8 + b5 - 256`)*
+	* *`b4<<8+b5`: looks like torque, the same as `0x167 b1<<8+b2` (use this formula for reasonable values: `(b4&3)<<8 + b5 - 256`)*
 + **0x43D (HS1):**
 	 * *`b2` & `b3` opposite to each other, correlates with RPM/acceleration*
 + **0x43E (HS1 & HS3):**
