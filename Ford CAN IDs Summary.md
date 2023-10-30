@@ -18,8 +18,8 @@
 	* `b0<<8+b1`: braking pressure
 + **0x082 (HS1):**
 	* `b0`: steering with some noise
-	* `b2<<8+b3`: power steering
-	* *`b4`: relates to steering, opposite to `b2<<8+b3`*
+	* `b2<<8+b3`: current consumption
+	*`b4`: voltage (`b4/20+6`)
 + **0x083 (HS1, 100ms):**
 	* `b0`: turn signals (16 - left, 32 - right)
 + **0x084 (HS1, 1000ms):**
@@ -29,12 +29,14 @@
 	* `b0<<8+b1`: steering
 + **0x092 (HS1, 100ms):**
 	* *`b2<<8+b3`: noise during driving, some kind of body position sensor?*
-	* *`b4<<8+b5`: correlates with longitudinal G force (`0x213`) with more noise*
+	* *`b4<<8+b5`: body position sensor on rear axle*
 + **0x109 (HS3):**
 	* `b0<<8+b1`: RPM: `(b0<<8 + b1) / 4`
 	* `b2`: gearbox mode (1 - P, 14 - during engine start, 17 - R, 33 - N, 49 - D, 65 - S)
 	* `b4<<8+b5`: speed: `(b4<<8 + b5) / 100`
 	* `b6`: 1 for rear gear
++ **0x156 (HS1 & HS3, 10ms):**
+	* `b1`: engine coolant temperature (`(b1-60)`°C)
 + **0x167 (HS1 & HS3, 10ms):**
 	* `b0`: 0 if engine off, 32 on engine start, 114 if engine running
 	* *`b1<<8+b2`: looks like engine load / torque (use this formula for reasonable values: `((b1-128)<<8 + b2) / 4`)*
@@ -72,6 +74,7 @@
 + **0x230 (HS1, 20ms):**
 	* `b0`: current gear (224 - R, 16 - 1, 32 - 2, ..., bit0 for clutch disengaged)
 	* `b1`: gearbox mode (2 - R, 4 - N, 6 - D, 8 - S)
+ 	* `b4`: transmission fluid temperature (`(b4-60)`°C)
 + **0x242 (HS1, 40ms):**
 	* *`b2<<8+b3`: correlates with headlights on/off, saw-like graph when engine idles. Current?*
 + **0x313 (HS3):**
@@ -102,6 +105,8 @@
 	* `b5`: 0 - instruments cluster backlight in day mode, 5 - instruments cluster backlight in night mode
 	* `b6`: 0/40 - left turn signal
 	* `b7`: bit0 - fog light, 8x - hazard light, Cx - right turn signal
++ **0x3B5 (HS1 & HS3):**
+	* tire pressure: `b1` - front left, `b3` - front right, `b5` - rear right, `b7` - rear left (in kPa, x0.1450377377 to convert to PSI) 
 + **0x3D0 (HS3):**
 	* *`b2<<8+b3`: slowly grows during engine off, idle stay and run*
 + **0x415 (HS1 & HS3):**
@@ -119,6 +124,6 @@
 	 * *`b2` & `b3` opposite to each other, correlates with RPM/acceleration*
 + **0x43E (HS1 & HS3):**
 	* *`b3`: opposite to `b5<<8+b6`*
-	* `b5<<8+b6`: engine load: `(b5<<8 + b6) / 72 - 136`
+	* `b5<<8+b6`: engine load in %: `(b5<<8 + b6) / 72 - 140`
 + **0x4B0 (HS1):**
 	* `b5<<8+b6` - braking pressure
