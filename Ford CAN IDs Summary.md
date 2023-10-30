@@ -19,7 +19,7 @@
 + **0x082 (HS1):**
 	* `b0`: steering with some noise
 	* `b2<<8+b3`: current consumption
-	* `b4`: voltage (`b4/20+6`)
+	* `b4`: voltage (`b4/20+6`V)
 + **0x083 (HS1, 100ms):**
 	* `b0`: turn signals (16 - left, 32 - right)
 + **0x084 (HS1, 1000ms):**
