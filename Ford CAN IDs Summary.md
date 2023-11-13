@@ -13,14 +13,16 @@
 	* `b5<<8+b6`: speed: `(b5<<8 + b6) / 100`
 + **0x077 (HS1 & HS3, 20ms):**
 	* `b0<<8+b1`: speed
-	* `b2<<8+b3`: lateral G force
+	* `b2<<8+b3`: lateral G force relative to the car base (is 0 when the car stays still, in contrast to `0x092`). Use the formula `((b1&31)<<8 + b2 - 2048) / 200` (m/s^2)
 + **0x07D (HS1, 20ms):**
-	* `b0<<8+b1`: braking pressure
+	* `b0<<8+b1`: braking pressure *applied from brake pedal?*
+	* `b3<<8+b4`: braking pressure *applied also in case of traction control (along with `0x416 b1 bit7`)*
 + **0x082 (HS1):**
 	* `b0`: steering with some noise
 	* `b2<<8+b3`: current consumption
 	* `b4`: voltage (`b4/20+6`V)
 + **0x083 (HS1, 100ms):**
+  	* steering wheel buttons (headlight, cruise control, windshield wiper)
 	* `b0`: turn signals (16 - left, 32 - right)
 + **0x084 (HS1, 1000ms):**
 	* `b4`: time, seconds (0-60)
@@ -28,8 +30,10 @@
 + **0x085 (HS1):**
 	* `b0<<8+b1`: steering
 + **0x092 (HS1, 100ms):**
-	* *`b2<<8+b3`: noise during driving, some kind of body position sensor?*
-	* *`b4<<8+b5`: body position sensor on rear axle*
+	* G-force relative to ground plane, noisy. If the car stays on inclined surface it will affect the value. Use the formula: `((b1&31)<<8 + b2) / 100 - 40` (m/s^2)
+  	* `b0<<8+b1`: lateral (positive if directed towards right side) 
+	* `b2<<8+b3`: longitudinal (positive if directed towards back)
+	* `b4<<8+b5`: vertical (is 9.8 when stay still on horigontal surface)
 + **0x109 (HS3):**
 	* `b0<<8+b1`: RPM: `(b0<<8 + b1) / 4`
 	* `b2`: gearbox mode (1 - P, 14 - during engine start, 17 - R, 33 - N, 49 - D, 65 - S)
@@ -42,7 +46,7 @@
 	* *`b1<<8+b2`: looks like engine load / torque (use this formula for reasonable values: `((b1-128)<<8 + b2) / 4`)*
 	* `b5<<8+b6`: MAP (manifold abs. pressure): `(b5-25)<<8 + b6 - 128) / 5`
 + **0x171 (HS1 & HS3, 30ms):**
-	* `b0`: current gear (20 - P/N, 36, 52, 68, 84, 100 - for gears), `bit1` for manual mode. *Sometimes value differs, ex: P->R: 14->10->14*
+	* `b0`: current gear (20 - P/N, 36, 52, 68, 84, 100 - for gears), `bit0` for manual mode, `bit1` if attempt to change gear fails
 	* `b1`: gearbox mode (0 - P, 32 - R, 64 - N, 96 - D, 128 - S)
 + **0x178 (HS1 & HS3, 100ms):**
 	* *`b2<<8+b3`: some +/- constant graph during run*
@@ -65,8 +69,9 @@
 	* `b0`: drive modes (1 - normal, 17 - sport/track, 33 - snow)
 	* *`b1`: represents current gear, `bit7` - drops sometimes when gears change, `bit2` drops sometimes*
 + **0x213 (HS1 & HS3, 20ms):**
+  	* `b1`: is 255, goes down when traction control applies braking
 	* *`b4`: 0 when driving, 128 if speed=0*
-	* `b5<<8+b6`: longitudinal G force: `if (b5 & 0x2) then b6 else if (b5 & 0x1) then (b6 - 256) else 0`
+	* `b5<<8+b6`: longitudinal G force relative to the car base (is 0 when the car stays still, in contrast to `0x092`). Use the formula `((b1&3)<<8 + b2 - 512) / 28` (m/s^2)
 + **0x216 (HS1 & HS3, 20ms):**
 	* *not understandable saw-like graphs, frequency correlates with speed*
 + **0x217 (HS1, 10ms):**
@@ -76,7 +81,8 @@
 	* `b1`: gearbox mode (2 - R, 4 - N, 6 - D, 8 - S)
  	* `b4`: transmission fluid temperature (`(b4-60)`°C)
 + **0x242 (HS1, 40ms):**
-	* *`b2<<8+b3`: correlates with headlights on/off, saw-like graph when engine idles. Current?*
+	* `b2<<8+b3`: correlates with headlights on/off, saw-like graph when engine idles. Current?
+ 	* `b4`: voltage (`b4/16`V), smoother than `0x082 b4`
 + **0x313 (HS3):**
 	* *`b5`: constantly grows, depending on speed. Odometer?*
 + **0x315 (HS3):**
@@ -113,6 +119,10 @@
 	* `b0<<8+b1`: speed: `(b0<<8 + b1) / 100`
 	* *`b2`, `b3`: saw-like graph* 
 	* *`b6<<8+b7`: not understandable graph during engine off, idle stay and run*
++ **0x416 (HS1 & HS3, 100ms):**
+	* `b0`: brake pedal, some bits work as a counter
+	* `b1`: `bit7` set when braking automatically because of traction control
+	* `b5`: relates to traction control, may be `0x0`, `0x8`, `0x18` - when TC turned off with holding the button for 7 seconds)
 + **0x421 (HS1 & HS3):**
 	* *`b2`: smooth saw-like graph during run, changes when engine starts, voltage/current?*
 	* *`b6`: smooth saw-like graph during run, changes when engine starts, voltage/current?*
