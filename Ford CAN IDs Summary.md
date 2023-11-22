@@ -13,17 +13,19 @@
 	* `b5<<8+b6`: speed: `(b5<<8 + b6) / 100`
 + **0x077 (HS1 & HS3, 20ms):**
 	* `b0<<8+b1`: speed
-	* `b2<<8+b3`: lateral G force relative to the car base (is 0 when the car stays still, in contrast to `0x092`). Use the formula `((b1&31)<<8 + b2 - 2048) / 200` (m/s^2)
+	* `b2<<8+b3`: lateral G force relative to the car base (is 0 when the car stays still, in contrast to `0x092`). Use the formula `((b2&31)<<8 + b3 - 2048) / 200` (m/s^2)
 + **0x07D (HS1, 20ms):**
 	* `b0<<8+b1`: braking pressure *applied from brake pedal?*
 	* `b3<<8+b4`: braking pressure *applied also in case of traction control (along with `0x416 b1 bit7`)*
++ **0x081 (HS3):**
+	* `b0`: wheel buttons on left side: `bit0` - down, `bit1` - left, `bit2` - right, `bit3` - up, `bit4` - ok
 + **0x082 (HS1):**
 	* `b0`: steering with some noise
 	* `b2<<8+b3`: current consumption
 	* `b4`: voltage (`b4/20+6`V)
 + **0x083 (HS1, 100ms):**
   	* steering wheel buttons (headlight, cruise control, windshield wiper)
-	* `b0`: turn signals (16 - left, 32 - right)
+	* `b0`: turn signals (`bit4` - left, `bit5` - right)
 + **0x084 (HS1, 1000ms):**
 	* `b4`: time, seconds (0-60)
 	* `b5`: time, minutes
@@ -71,7 +73,7 @@
 + **0x213 (HS1 & HS3, 20ms):**
   	* `b1`: is 255, goes down when traction control applies braking
 	* *`b4`: 0 when driving, 128 if speed=0*
-	* `b5<<8+b6`: longitudinal G force relative to the car base (is 0 when the car stays still, in contrast to `0x092`). Use the formula `((b1&3)<<8 + b2 - 512) / 28` (m/s^2)
+	* `b5<<8+b6`: longitudinal G force relative to the car base (is 0 when the car stays still, in contrast to `0x092`). Use the formula `((b5&3)<<8 + b6 - 512) / 28` (m/s^2)
 + **0x216 (HS1 & HS3, 20ms):**
 	* *not understandable saw-like graphs, frequency correlates with speed*
 + **0x217 (HS1, 10ms):**
@@ -83,6 +85,8 @@
 + **0x242 (HS1, 40ms):**
 	* `b2<<8+b3`: correlates with headlights on/off, saw-like graph when engine idles. Current?
  	* `b4`: voltage (`b4/16`V), smoother than `0x082 b4`
++ **0x2A1 (HS3):**
+	* `b0`: wheel buttons on right side: `FF` if no buttons pressed, `FD` - vol+, `FE` - vol-, `32` - previous, `33` - next, `4F` - M, `45` - phone up, `46` - phone down, `30` - voice command, `44` - mute
 + **0x313 (HS3):**
 	* *`b5`: constantly grows, depending on speed. Odometer?*
 + **0x315 (HS3):**
@@ -90,7 +94,7 @@
 + **0x318 (HS3):**
 	* *`b5<<8+b6`: slowly decreases during run. Gas in tank?*
 + **0x326 (HS1):** 
-	* * correlates with climate functionality*
+	* *correlates with climate functionality*
 + **0x331 (HS1 & HS3):**
 	* *`b2<<8+b3`: slowly grows during run*
 	* *`b7`: changes 4/2 when ambiant light or headlights on/off*
