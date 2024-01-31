@@ -23,6 +23,7 @@
 	* `b0`: steering with some noise
 	* `b2<<8+b3`: current consumption
 	* `b4`: voltage (`b4/20+6`V)
+	* `b6`: steering mode (`0x40` - normal, `0x44` - sport, `0x48` - comfort)
 + **0x083 (HS1, 100ms):**
   	* steering wheel buttons (headlight, cruise control, windshield wiper)
 	* `b0`: turn signals (`bit4` - left, `bit5` - right)
@@ -42,7 +43,8 @@
 	* `b4<<8+b5`: speed: `(b4<<8 + b5) / 100`
 	* `b6`: 1 for rear gear
 + **0x156 (HS1 & HS3, 10ms):**
-	* `b1`: engine coolant temperature (`(b1-60)`°C)
+	* `b0`: coolant temperature (`(b0-60)`°C)
+	* `b1`: engine oil temperature (`(b1-60)`°C)
 + **0x167 (HS1 & HS3, 10ms):**
 	* `b0`: 0 if engine off, 32 on engine start, 114 if engine running
 	* *`b1<<8+b2`: looks like engine load / torque (use this formula for reasonable values: `((b1-128)<<8 + b2) / 4`)*
@@ -72,6 +74,7 @@
 	* *`b1`: represents current gear, `bit7` - drops sometimes when gears change, `bit2` drops sometimes*
 + **0x213 (HS1 & HS3, 20ms):**
   	* `b1`: is 255, goes down when traction control applies braking
+  	* `b2`: `bit7` - traction control applied when the wheels slide (works with TC ON & OFF, doesn't work with ATC OFF)
 	* *`b4`: 0 when driving, 128 if speed=0*
 	* `b5<<8+b6`: longitudinal G force relative to the car base (is 0 when the car stays still, in contrast to `0x092`). Use the formula `((b5&3)<<8 + b6 - 512) / 28` (m/s^2)
 + **0x216 (HS1 & HS3, 20ms):**
@@ -86,7 +89,7 @@
 	* `b2<<8+b3`: correlates with headlights on/off, saw-like graph when engine idles. Current?
  	* `b4`: voltage (`b4/16`V), smoother than `0x082 b4`
 + **0x2A1 (HS3):**
-	* `b0`: wheel buttons on right side: `FF` if no buttons pressed, `FD` - vol+, `FE` - vol-, `32` - previous, `33` - next, `4F` - M, `45` - phone up, `46` - phone down, `30` - voice command, `44` - mute
+	* `b0`: wheel buttons on right side: `0xFF` if no buttons pressed, `0xFD` - vol+, `0xFE` - vol-, `0x32` - previous, `0x33` - next, `0x4F` - M, `0x45` - phone up, `0x46` - phone down, `0x30` - voice command, `0x44` - mute
 + **0x313 (HS3):**
 	* *`b5`: constantly grows, depending on speed. Odometer?*
 + **0x315 (HS3):**
@@ -107,16 +110,19 @@
 + **0x3B2 (HS3):**
 	* same as `0x3B3`
 + **0x3B3 (HS1 & HS3):**
-	* `b0`: 40 - headlamp off, 44 - headlamp on
-	* `b1`: 48 - ambient daylight, 88 - ambient twilight, 4A - hazard light
-	* `b2`: x0/x2/x4/x6 - counter for pressed instruments cluster backlight +/- buttons, 1x - headlamp on non-auto, Cx - headlamp on auto (during daylight)
-	* `b3`: 0C - dashboard dark mode(?), 0D-12 - instruments cluster backlight dimming
-	* `b4`: 10 - turn signals off, 18 - any of turn signals on (left, right, hazard)
-	* `b5`: 0 - instruments cluster backlight in day mode, 5 - instruments cluster backlight in night mode
-	* `b6`: 0/40 - left turn signal
-	* `b7`: bit0 - fog light, 8x - hazard light, Cx - right turn signal
+	* `b0`: `0x40` - headlamp off, `0x44` - headlamp on
+	* `b1`: `0x48` - ambient daylight, `0x88` - ambient twilight, `0x4A` - hazard light
+	* `b2`: `0x#0/#2/#4/#6` - counter for pressed instruments cluster backlight +/- buttons, `0x1#` - headlamp on non-auto, `0xC#` - headlamp on auto (during daylight)
+	* `b3`: `0x0C` - dashboard dark mode(?), `0x0D`-`0x12` - instruments cluster backlight dimming
+	* `b4`: `0x10` - turn signals off, `0x18` - any of turn signals on (left, right, hazard)
+	* `b5`: `0x0` - instruments cluster backlight in day mode, `0x5` - instruments cluster backlight in night mode
+	* `b6`: `0x40` - left turn signal
+	* `b7`: `bit0` - fog light, `0x8#` - hazard light, `0xC#` - right turn signal
 + **0x3B5 (HS1 & HS3):**
 	* tire pressure: `b1` - front left, `b3` - front right, `b5` - rear right, `b7` - rear left (in kPa, x0.1450377377 to convert to PSI) 
++ **0x3C8 (HS1, 1000ms):**
+	* `b0`, `b4`, `b5` - RGB colors of My Color
+	* `b2` - drive mode (0 - normal, 1 - sport, 2 - snow, 3 - track)
 + **0x3D0 (HS3):**
 	* *`b2<<8+b3`: slowly grows during engine off, idle stay and run*
 + **0x415 (HS1 & HS3):**
@@ -126,7 +132,7 @@
 + **0x416 (HS1 & HS3, 100ms):**
 	* `b0`: brake pedal, some bits work as a counter
 	* `b1`: `bit7` set when braking automatically because of traction control
-	* `b5`: relates to traction control, may be `0x0`, `0x8`, `0x18` - when TC turned off with holding the button for 7 seconds)
+	* `b5`: traction control mode (`0x0` - TC ON, `0x8` - TC OFF, `0x18` - ATC OFF when pressing the button for 7 seconds)
 + **0x421 (HS1 & HS3):**
 	* *`b2`: smooth saw-like graph during run, changes when engine starts, voltage/current?*
 	* *`b6`: smooth saw-like graph during run, changes when engine starts, voltage/current?*
@@ -135,7 +141,7 @@
 + **0x42F (HS1 & HS3):**
 	* *`b4<<8+b5`: looks like torque, the same as `0x167 b1<<8+b2` (use this formula for reasonable values: `(b4&3)<<8 + b5 - 256`)*
 + **0x43D (HS1):**
-	 * *`b2` & `b3` opposite to each other, correlates with RPM/acceleration*
+	* *`b2` & `b3` opposite to each other, correlates with RPM/acceleration*
 + **0x43E (HS1 & HS3):**
 	* *`b3`: opposite to `b5<<8+b6`*
 	* `b5<<8+b6`: engine load in %: `(b5<<8 + b6) / 72 - 140`
