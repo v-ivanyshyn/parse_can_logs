@@ -28,8 +28,11 @@
   	* steering wheel buttons (headlight, cruise control, windshield wiper)
 	* `b0`: turn signals (`bit4` - left, `bit5` - right)
 + **0x084 (HS1, 1000ms):**
-	* `b4`: time, seconds (0-60)
-	* `b5`: time, minutes
+	* `b0`: current year, last 2 digits
+	* `b2<<8+b3`: current day number of the year (ex. `0x00` `0x20` -> `0*256+32=32` -> Feb. 1)
+	* `b4`: current time, seconds (0-60)
+	* `b5`: current time, minutes
+	* `b6`: current time, hour
 + **0x085 (HS1):**
 	* `b0<<8+b1`: steering
 + **0x092 (HS1, 100ms):**
@@ -75,6 +78,7 @@
 + **0x213 (HS1 & HS3, 20ms):**
   	* `b1`: is 255, goes down when traction control applies braking
   	* `b2`: `bit7` - traction control applied when the wheels slide (works with TC ON & OFF, doesn't work with ATC OFF)
+  	* `b3`: `0x00`->`0x80` - traction control applies braking (same as `b1`)
 	* *`b4`: 0 when driving, 128 if speed=0*
 	* `b5<<8+b6`: longitudinal G force relative to the car base (is 0 when the car stays still, in contrast to `0x092`). Use the formula `((b5&3)<<8 + b6 - 512) / 28` (m/s^2)
 + **0x216 (HS1 & HS3, 20ms):**
