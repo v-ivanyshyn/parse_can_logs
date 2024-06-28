@@ -129,6 +129,12 @@
 	* `b2` - drive mode (0 - normal, 1 - sport, 2 - snow, 3 - track)
 + **0x3D0 (HS3):**
 	* *`b2<<8+b3`: slowly grows during engine off, idle stay and run*
++ **0x40A (HS1 & HS3):**
+	* VIN code: when `b0` is `0xC1` the `b1` may be `0x00`, `0x01` or `0x02` and the following bytes `b2`-`b7` contain ASCII encoded VIN, for example:
+	`0x40A: C1 00 31 46 41 36 50 38`
+	`0x40A: C1 01 43 46 38 47 35 32`
+	`0x40A: C1 02 33 34 31 39 37 FF`
+	results in `1FA6P8CF8G5234197`
 + **0x415 (HS1 & HS3):**
 	* `b0<<8+b1`: speed: `(b0<<8 + b1) / 100`
 	* *`b2`, `b3`: saw-like graph* 
